@@ -8,14 +8,17 @@ import {
   Button,
   Loader,
   Notification,
+  Modal,
 } from 'components';
 import { fetchData } from 'services/api';
 
 export const App = () => {
   const [hits, setHits] = useState([]);
+  const [largeImage, setlargeImage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState('idle');
+  const [showModal, setshowModal] = useState(false);
 
   useEffect(() => {
     const getImage = async (searchQuery, page) => {
@@ -59,6 +62,11 @@ export const App = () => {
     setPage(prevPage => prevPage + 1);
   };
 
+  const toggleModal = largeImage => {
+    setshowModal(!showModal);
+    setlargeImage(largeImage);
+  };
+
   return (
     <Container>
       <Searchbar onSubmit={handleFormSubmit} />
@@ -67,10 +75,17 @@ export const App = () => {
           Ooops, someting went wrong. Please, try again.
         </Notification>
       )}
-      {hits.length > 0 && status !== 'rejected' && <ImageGallery hits={hits} />}
+      {hits.length > 0 && status !== 'rejected' && (
+        <ImageGallery toggleModal={toggleModal} hits={hits} />
+      )}
       {status === 'pending' && <Loader />}
       {status === 'resolved' && hits.length > 0 && hits.length % 12 === 0 && (
         <Button onClick={onLoadMore}>LoadMore</Button>
+      )}
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={largeImage} alt="LargeImage" />
+        </Modal>
       )}
       <ToastContainer autoClose={5000} />
     </Container>
